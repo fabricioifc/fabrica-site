@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    container_name: fabrica-prod-web
+    ports:
+      - "8090:8090"
+    volumes:
+      - .:/app
+    networks:
+      - fabrica-network
+    
+networks:
+  fabrica-network:
+    external: true

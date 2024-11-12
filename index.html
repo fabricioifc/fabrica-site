@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fábrica de Software - IFC Videira</title>
+    <meta name="description" content="Fábrica de Software do IFC Videira">
+    <meta name="keywords" content="Fábrica de Software, IFC Videira, Desenvolvimento de Software">
+    <meta name="author" content="Fábrica de Software do IFC Videira">
+    <link rel="shortcut icon" href="logo-curto.svg" type="image/x-icon">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#FF5733">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 15px;
+            animation: changeBackground 10s infinite;
+        }
+
+        .logo-container {
+            background-image: url('logo-roxo.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 800px;
+            height: 100%;
+            margin: 20px;
+            animation: floating 3s ease-in-out infinite,
+                       pulse 2s ease-in-out infinite,
+                       rotateOnHover 0.5s ease-out;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes rotateOnHover {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes changeBackground {
+            0% { background-color: #e1e900; }
+            20% { background-color: #33FF57; }
+            40% { background-color: #3357FF; }
+            60% { background-color: #FF33A1; }
+            80% { background-color: #57FF33; }
+            100% { background-color: #e1e900; }
+        }
+
+        @media (max-width: 768px) {
+            .logo-container {
+                background-image: url('logo-curto.svg');
+                width: 100%;
+                animation: floating 2s ease-in-out infinite,
+                         pulse 1.5s ease-in-out infinite;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <!-- <img src="logo-roxo.svg" alt="Logo da Fábrica de Software do IFC Videira"> -->
+    </div>
+</body>
+</html>
