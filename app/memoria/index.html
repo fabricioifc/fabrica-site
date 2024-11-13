@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória 🐞</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🦄</text></svg>"></link>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100dvh;
+            animation: changeBackground 5s infinite;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .welcome-screen, .game-screen, .end-screen {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 600px;
+            max-width: 100%;
+
+        }
+
+        .welcome-screen.hidden,
+        .game-screen.hidden,
+        .end-screen.hidden {
+            display: none;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        input, select, button {
+            margin: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin: 2rem auto;
+        }
+
+        .small {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .large {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .card {
+            aspect-ratio: 1;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-front {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .card-back {
+            background-color: white;
+            transform: rotateY(180deg);
+        }
+
+        .score {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .ranking {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .ranking h2 {
+            margin-bottom: 1rem;
+        }
+
+        .ranking-list {
+            list-style: none;
+        }
+
+        .ranking-list li {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .audio-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            color: #333;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .audio-controls.muted .unmute-icon {
+            display: none;
+        }
+        
+        .audio-controls:not(.muted) .mute-icon {
+            display: none;
+        }
+
+        @keyframes changeBackground {
+            0% { background-color: #e1e900; }
+            20% { background-color: #33FF57; }
+            40% { background-color: #3357FF; }
+            60% { background-color: #FF33A1; }
+            80% { background-color: #57FF33; }
+            100% { background-color: #e1e900; }
+        }
+
+        .home-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .home-button:hover {
+            transform: scale(1.1);
+            background:none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="home-button" onclick="goHome()" title="Voltar para página inicial">🏠</button>
+
+        <div class="welcome-screen">
+            <h1>Jogo da Memória</h1>
+            <input type="text" id="playerName" placeholder="Seu nome" required autofocus>
+            <select id="boardSize">
+                <option value="small">Pequeno (4x4)</option>
+                <option value="large">Grande (6x6)</option>
+            </select>
+            <button onclick="startGame()">Começar</button>
+        </div>
+
+        <div class="game-screen hidden">
+            <div class="score">Pontuação: <span id="score">100</span></div>
+            <div class="game-board"></div>
+        </div>
+
+        <div class="end-screen hidden">
+            <h1>Fim de Jogo!</h1>
+            <div id="finalScore"></div>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <div class="ranking">
+                <h2>Ranking</h2>
+                <ul class="ranking-list"></ul>
+            </div>
+        </div>
+
+        <div class="audio-controls">
+            <span class="unmute-icon">🔊</span>
+            <span class="mute-icon">🔇</span>
+        </div>
+    </div>
+
+    <!-- <audio id="background-audio" loop>
+        <source src="bg-2.mp3" type="audio/mpeg">
+    </audio> -->
+
+    <script defer>
+        const cards = {
+            "emojis": ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐙", "🦄", "🦋", "🐞"]
+        };
+
+        const sounds = {
+            flip: new Audio('flip.mp3'),
+            match: new Audio('correct-2.mp3'),
+            win: new Audio('end.mp3'),
+            bg: new Audio('bg-1.mp3'),
+            game_bg: new Audio('bg-2.mp3')
+        };
+
+        let gameState = {
+            playerName: '',
+            boardSize: '',
+            score: 100,
+            flippedCards: [],
+            matchedPairs: 0,
+            totalPairs: 0
+        };
+
+        // Função para tocar áudio com melhor controle
+        function playAudio(audio, options = {}) {
+            
+            // Se for música de fundo, atualiza o rastreamento
+            if (audio === sounds.bg || audio === sounds.game_bg) {
+                if (currentBackgroundMusic && currentBackgroundMusic !== audio) {
+                    currentBackgroundMusic.pause();
+                    currentBackgroundMusic.currentTime = 0;
+                }
+                currentBackgroundMusic = audio;
+            }
+            
+            audio.volume = options.volume || 1;
+            audio.loop = options.loop || false;
+            
+            if (!audioEnabled) return;
+
+            // Tenta tocar o áudio
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Playback prevented:", error);
+                    audioEnabled = false;
+                    audioControls.classList.add('muted');
+                });
+            }
+        }
+
+        // Função para pausar áudio
+        function pauseAudio(audio) {
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        }
+
+       // Atualizar a função startGame para usar o novo sistema
+        function startGame() {
+            const playerName = document.getElementById('playerName').value;
+            const boardSize = document.getElementById('boardSize').value;
+            
+            if (!playerName) {
+                alert('Por favor, digite seu nome!');
+                return;
+            }
+
+            gameState.playerName = playerName;
+            gameState.boardSize = boardSize;
+            gameState.score = 100;
+            gameState.flippedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.totalPairs = boardSize === 'small' ? 8 : 18;
+
+            document.querySelector('.welcome-screen').classList.add('hidden');
+            document.querySelector('.game-screen').classList.remove('hidden');
+            
+            initializeBoard();
+            
+            // Troca a música de fundo
+            if (currentBackgroundMusic) {
+                pauseAudio(currentBackgroundMusic);
+            }
+
+            currentBackgroundMusic = sounds.game_bg;
+            if (audioEnabled) {
+                playAudio(currentBackgroundMusic, { volume: 0.4, loop: true });
+            }
+        }
+
+        // Atualizar a função goHome
+        function goHome() {
+            if (confirm('Tem certeza que deseja voltar à página inicial? O progresso atual será perdido.') === true) {
+                document.querySelector('.game-screen').classList.add('hidden');
+                document.querySelector('.end-screen').classList.add('hidden');
+                document.querySelector('.welcome-screen').classList.remove('hidden');
+                document.getElementById('playerName').value = '';
+                document.getElementById('score').textContent = '100';
+                
+                // Troca a música de fundo
+                if (currentBackgroundMusic) {
+                    pauseAudio(currentBackgroundMusic);
+                }
+                if (audioEnabled) {
+                    playAudio(sounds.bg, { volume: 0.4, loop: true });
+                }
+
+                // volta para ../index.html
+                window.location.href = '../';
+            }
+        }
+
+        function initializeBoard() {
+            const board = document.querySelector('.game-board');
+            board.className = 'game-board ' + gameState.boardSize;
+            
+            const numPairs = gameState.boardSize === 'small' ? 8 : 18;
+            const selectedEmojis = cards.emojis.slice(0, numPairs);
+            const gameEmojis = [...selectedEmojis, ...selectedEmojis];
+            
+            // Embaralhar os emojis
+            const shuffledEmojis = gameEmojis.sort(() => Math.random() - 0.5);
+            
+            board.innerHTML = '';
+            shuffledEmojis.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = index;
+                card.dataset.emoji = emoji;
+                
+                card.innerHTML = `
+                    <div class="card-front">?</div>
+                    <div class="card-back">${emoji}</div>
+                `;
+                
+                card.addEventListener('click', () => flipCard(card));
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (
+                card.classList.contains('flipped') ||
+                gameState.flippedCards.length >= 2 ||
+                gameState.flippedCards.includes(card)
+            ) {
+                return;
+            }
+
+            card.classList.add('flipped');
+            gameState.flippedCards.push(card);
+
+            if (gameState.flippedCards.length === 2) {
+                setTimeout(checkMatch, 1000);
+            }
+            playAudio(sounds.flip, { volume: 0.4 });
+        }
+
+        function checkMatch() {
+            const [card1, card2] = gameState.flippedCards;
+            const match = card1.dataset.emoji === card2.dataset.emoji;
+
+            if (!match) {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                gameState.score = Math.max(0, gameState.score - 1);
+                document.getElementById('score').textContent = gameState.score;
+            } else {
+                gameState.matchedPairs++;
+                playAudio(sounds.match, { volume: 0.4 });
+            }
+
+            gameState.flippedCards = [];
+
+            if (gameState.matchedPairs === gameState.totalPairs) {
+                endGame();
+            }
+        }
+
+
+        // Atualizar a função endGame
+        function endGame() {
+            document.querySelector('.game-screen').classList.add('hidden');
+            document.querySelector('.end-screen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = 
+                `Pontuação final: ${gameState.score}`;
+
+            saveScore(gameState.playerName, gameState.score, gameState.boardSize);
+            displayRanking();
+            
+            if (audioEnabled) {
+                // Pausa a música atual
+                if (currentBackgroundMusic) {
+                    pauseAudio(currentBackgroundMusic);
+                }
+                // Toca o som de vitória
+                playAudio(sounds.win, { volume: 0.4 });
+            }
+        }
+
+        function saveScore(playerName, score, boardSize) {
+            const rankings = JSON.parse(localStorage.getItem('memoryGameRankings') || '[]');
+            rankings.push({
+                playerName,
+                score,
+                boardSize,
+                date: new Date().toISOString()
+            });
+            
+            rankings.sort((a, b) => b.score - a.score);
+            localStorage.setItem('memoryGameRankings', JSON.stringify(rankings));
+        }
+
+        function displayRanking() {
+            const rankings = JSON.parse(localStorage.getItem('memoryGameRankings') || '[]');
+            const rankingList = document.querySelector('.ranking-list');
+            
+            rankingList.innerHTML = rankings
+                .slice(0, 5)
+                .map((rank, index) => `
+                    <li>
+                        ${index + 1}. ${rank.playerName} - ${rank.score} pontos 
+                        (Tabuleiro ${rank.boardSize === 'small' ? 'pequeno' : 'grande'})
+                    </li>
+                `)
+                .join('');
+        }
+
+        // Atualizar a função restartGame
+        function restartGame() {
+            document.querySelector('.end-screen').classList.add('hidden');
+            document.querySelector('.welcome-screen').classList.remove('hidden');
+            document.getElementById('playerName').value = '';
+            document.getElementById('score').textContent = '100';
+            
+            // Troca a música de fundo
+            if (currentBackgroundMusic) {
+                pauseAudio(currentBackgroundMusic);
+            }
+            if (audioEnabled) {
+                playAudio(sounds.bg, { volume: 0.4, loop: true });
+            }
+        }
+
+        // Primeiro, vamos atualizar as variáveis de controle de áudio
+        let audioEnabled = true;
+        let currentBackgroundMusic = null; // Para rastrear qual música está tocando
+
+        const audioControls = document.querySelector('.audio-controls');
+        const unmuteIcon = document.querySelector('.unmute-icon');
+        const muteIcon = document.querySelector('.mute-icon');
+
+
+        // Atualizar o manipulador de clique do controle de áudio
+        audioControls.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            audioControls.classList.toggle('muted');
+            
+            if (audioEnabled) {
+                // Retoma a música atual de fundo
+                if (currentBackgroundMusic) {
+                    currentBackgroundMusic.volume = 0.4;
+                    currentBackgroundMusic.loop = true;
+                    currentBackgroundMusic.play();
+                } else {
+                    // Se nenhuma música estiver definida, começa com a música padrão
+                    playAudio(sounds.bg, { volume: 0.4, loop: true });
+                }
+            } else {
+                // Pausa a música atual
+                if (currentBackgroundMusic) {
+                    currentBackgroundMusic.pause();
+                }
+            }
+        });
+
+        // Inicialização do áudio quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            if (audioEnabled) {
+                playAudio(sounds.bg, { volume: 0.4, loop: true });
+            }
+        });
+
+    </script>
+</body>
+</html>
