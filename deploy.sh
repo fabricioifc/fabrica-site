@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Parâmetros
+GITHUB_URL=https://github.con/fabricioifc/fabrica-site.git
 NETWORK_NAME=fabrica-network
 DOCKER_COMPOSE_FILE=docker-compose.yml
 BRANCH=main
