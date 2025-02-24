@@ -3,6 +3,7 @@
 # Parâmetros
 GITHUB_URL=https://github.con/fabricioifc/fabrica-site.git
 NETWORK_NAME=fabrica-network
+NETWORK_NAME_NGINX=fabrica-nginx-proxy-network
 DOCKER_COMPOSE_FILE=docker-compose.yml
 BRANCH=main
 
@@ -25,14 +26,21 @@ docker compose down || error_exit "Não foi possível parar os containers"
 echo "Puxando as últimas mudanças do GitHub..."
 git pull origin $BRANCH || error_exit "Não foi possível puxar as últimas mudanças do GitHub ($BRANCH)"
 
-# Criar a rede fabrica-nginx-proxy-network se ela não existir. Essa rede é necessária para o nginx-proxy
+# Criar a rede fabrica-network se ela não existir.
 if [ ! "$(docker network ls --format '{{.Name}}' | grep $NETWORK_NAME)" ]; then
     echo "Criando a rede $NETWORK_NAME..."
     docker network create $NETWORK_NAME || error_exit "Não foi possível criar a rede $NETWORK_NAME"
 fi
 
+
 # Subir os containers novamente com as novas mudanças
 echo "Subindo os containers..."
 docker compose -f $DOCKER_COMPOSE_FILE up -d --build || error_exit "Não foi possível subir os containers"
+
+# Verificar se a rede NETWORK_NAME_NGINX está conectada ao container fabrica-prod-web
+if [ ! "$(docker network inspect -f '{{range .Containers}}{{.Name}}{{end}}' $NETWORK_NAME_NGINX | grep fabrica-prod-web)" ]; then
+    echo "Conectando a rede $NETWORK_NAME_NGINX ao container fabrica-prod-web..."
+    docker network connect $NETWORK_NAME_NGINX fabrica-prod-web || error_exit "Não foi possível conectar a rede $NETWORK_NAME_NGINX ao container fabrica-prod-web"
+fi
 
 echo "Deploy finalizado com sucesso!"
