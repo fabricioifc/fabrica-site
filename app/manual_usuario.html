@@ -451,7 +451,7 @@ docker compose down || error_exit <span class="hljs-string">"Não foi possível 
 <span class="hljs-built_in">echo</span> <span class="hljs-string">"Puxando as últimas mudanças do GitHub..."</span>
 git pull origin <span class="hljs-variable">$BRANCH</span> || error_exit <span class="hljs-string">"Não foi possível puxar as últimas mudanças do GitHub (<span class="hljs-variable">$BRANCH</span>)"</span>
 
-<span class="hljs-comment"># Criar a rede fabrica-nginx-proxy-network se ela não existir. Essa rede é necessária para o nginx-proxy</span>
+<span class="hljs-comment"># Criar a rede NETWORK_NAME se ela não existir.</span>
 <span class="hljs-keyword">if</span> [ ! <span class="hljs-string">"<span class="hljs-variable">$(docker network ls --format '{{.Name}}' | grep $NETWORK_NAME)</span>"</span> ]; <span class="hljs-keyword">then</span>
     <span class="hljs-built_in">echo</span> <span class="hljs-string">"Criando a rede <span class="hljs-variable">$NETWORK_NAME</span>..."</span>
     docker network create <span class="hljs-variable">$NETWORK_NAME</span> || error_exit <span class="hljs-string">"Não foi possível criar a rede <span class="hljs-variable">$NETWORK_NAME</span>"</span>
