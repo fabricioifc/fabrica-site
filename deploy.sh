@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Parâmetros
-GITHUB_URL=https://github.con/fabricioifc/fabrica-site.git
+GITHUB_URL=https://github.com/fabricioifc/fabrica-site.git
 NETWORK_NAME=fabrica-network
 NETWORK_NAME_NGINX=fabrica-nginx-proxy-network
 DOCKER_COMPOSE_FILE=docker-compose.yml
@@ -14,9 +14,10 @@ error_exit() {
     exit 1
 }
 
-# Verificar se o branch existe no repositório remoto
-if ! git ls-remote --exit-code --heads origin "$BRANCH" &>/dev/null; then
-    error_exit "Branch '$BRANCH' não existe no repositório remoto."
+# Verificar se o branch existe no repositório remoto do GitHub antes de fazer o deploy
+echo "Verificando se o branch '$BRANCH' existe no repositório remoto do GitHub..."
+if [ ! "$(git ls-remote --heads $GITHUB_URL $BRANCH)" ]; then
+    error_exit "O branch $BRANCH não existe no repositório remoto do GitHub"
 fi
 
 # Parar os containers em execução
