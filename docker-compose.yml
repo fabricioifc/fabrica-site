@@ -1,9 +1,9 @@
 services:
   web:
     build: .
-    container_name: fabrica-prod-web
+    container_name: eventos-comp-back
     ports:
-      - "8090:8090"
+      - "1111:8000"
     volumes:
       - .:/app
     networks:

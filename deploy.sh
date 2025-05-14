@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Parâmetros
-GITHUB_URL=https://github.com/fabricioifc/fabrica-site.git
 NETWORK_NAME=fabrica-network
 NETWORK_NAME_NGINX=fabrica-nginx-proxy-network
 DOCKER_COMPOSE_FILE=docker-compose.yml
 DOCKER_COMPOSE_BUILD=false
-BRANCH=main
+CONTAINER_NAME=eventos-comp-back
 
 # Função para exibir mensagens de erro e sair
 error_exit() {
@@ -14,19 +13,9 @@ error_exit() {
     exit 1
 }
 
-# Verificar se o branch existe no repositório remoto do GitHub antes de fazer o deploy
-echo "Verificando se o branch '$BRANCH' existe no repositório remoto do GitHub..."
-if [ ! "$(git ls-remote --heads $GITHUB_URL $BRANCH)" ]; then
-    error_exit "O branch $BRANCH não existe no repositório remoto do GitHub"
-fi
-
 # Parar os containers em execução
 echo "Parando os containers..."
 docker compose down || error_exit "Não foi possível parar os containers"
-
-# Puxar as últimas mudanças do GitHub
-echo "Puxando as últimas mudanças do GitHub..."
-git pull origin $BRANCH || error_exit "Não foi possível puxar as últimas mudanças do GitHub ($BRANCH)"
 
 # Criar a rede NETWORK_NAME se ela não existir.
 if [ ! "$(docker network ls --format '{{.Name}}' | grep $NETWORK_NAME)" ]; then
@@ -43,9 +32,9 @@ else
 fi
 
 # Verificar se a rede NETWORK_NAME_NGINX está conectada ao container fabrica-prod-web
-if [ ! "$(docker network inspect -f '{{range .Containers}}{{.Name}}{{end}}' $NETWORK_NAME_NGINX | grep fabrica-prod-web)" ]; then
-    echo "Conectando a rede $NETWORK_NAME_NGINX ao container fabrica-prod-web..."
-    docker network connect $NETWORK_NAME_NGINX fabrica-prod-web || error_exit "Não foi possível conectar a rede $NETWORK_NAME_NGINX ao container fabrica-prod-web"
+if [ ! "$(docker network inspect -f '{{range .Containers}}{{.Name}}{{end}}' $NETWORK_NAME_NGINX | grep $CONTAINER_NAME)" ]; then
+    echo "Conectando a rede $NETWORK_NAME_NGINX ao container $CONTAINER_NAME..."
+    docker network connect $NETWORK_NAME_NGINX $CONTAINER_NAME || error_exit "Não foi possível conectar a rede $NETWORK_NAME_NGINX ao container $CONTAINER_NAME"
 fi
 
 echo "Deploy finalizado com sucesso!"

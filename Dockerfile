@@ -4,7 +4,7 @@ FROM lipanski/docker-static-website:latest
 COPY /app .
 
 # Expose the website
-EXPOSE 8090
+EXPOSE 1111
 
 # Start the website
-CMD ["/busybox-httpd", "-f", "-v", "-p",  "8090", "-c", "httpd.conf"]
+CMD ["/busybox-httpd", "-f", "-v", "-p",  "1111", "-c", "httpd.conf"]
