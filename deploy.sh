@@ -4,7 +4,7 @@
 NETWORK_NAME=fabrica-network
 NETWORK_NAME_NGINX=fabrica-nginx-proxy-network
 DOCKER_COMPOSE_FILE=docker-compose.yml
-DOCKER_COMPOSE_BUILD=false
+DOCKER_COMPOSE_BUILD=true
 CONTAINER_NAME=eventos-comp-back
 
 # Função para exibir mensagens de erro e sair

@@ -1,14 +1,16 @@
 services:
-  web:
-    build: .
+  back:
+    build:
+      context: ./api
     container_name: eventos-comp-back
     ports:
-      - "1111:8000"
-    volumes:
-      - .:/app
+      - "1111:1111"
+    restart: unless-stopped
+    # volumes:
+    #   - ./api:/app
     networks:
       - fabrica-network
-    
+
 networks:
   fabrica-network:
     external: true
